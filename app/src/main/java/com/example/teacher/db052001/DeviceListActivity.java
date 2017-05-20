@@ -3,9 +3,12 @@ package com.example.teacher.db052001;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 public class DeviceListActivity extends AppCompatActivity {
@@ -18,7 +21,7 @@ public class DeviceListActivity extends AppCompatActivity {
         BluetoothManager manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         adapter = manager.getAdapter();
         scanner = adapter.getBluetoothLeScanner();
-
+        BTScan();
     }
 
     public void BTScan()
@@ -32,6 +35,14 @@ public class DeviceListActivity extends AppCompatActivity {
         {
             adapter.enable();
         }
-
+        scanner.startScan(new MyScanCallBack());
+    }
+    class MyScanCallBack extends ScanCallback
+    {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            super.onScanResult(callbackType, result);
+            Log.d("BLE", result.getDevice().getAddress());
+        }
     }
 }
