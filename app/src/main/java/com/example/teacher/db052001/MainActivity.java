@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity {
             {
                 Log.d("BLE1", "In Service:" + s.getUuid());
             }
+            SetupSensorStep(gatt);
         }
 
         @Override
