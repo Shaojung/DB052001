@@ -1,6 +1,7 @@
 package com.example.teacher.db052001;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -21,6 +22,13 @@ public class MainActivity extends AppCompatActivity {
         btn = (Button) findViewById(R.id.button);
         int permission = ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent it = new Intent(MainActivity.this, DeviceListActivity.class);
+                startActivity(it);
+            }
+        });
         if (permission != PERMISSION_GRANTED)
         {
             ActivityCompat.requestPermissions(MainActivity.this,
