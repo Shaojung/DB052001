@@ -3,7 +3,14 @@ package com.example.teacher.db052001;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCallback;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
@@ -21,6 +28,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.List;
+
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
     BluetoothAdapter BTadapter;
     BluetoothLeScanner scanner;
     BluetoothDevice BTDevice;
+    BluetoothGatt BTGatt;
     MyScanCallBack callBack = new MyScanCallBack();
     Handler hander;
     TextView tv1;
@@ -120,17 +130,86 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
+    public BluetoothGattCallback GattCallback = new BluetoothGattCallback() {
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            super.onConnectionStateChange(gatt, status, newState);
+            if (status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothProfile.STATE_CONNECTED) {
+                Log.d("BLE1", "Connected to GATT Server");
+                gatt.discoverServices();
+            } else {
+                Log.d("BLE1", "Disconnected from GATT Server");
+                gatt.disconnect();
+                gatt.close();
+            }
+        }
+
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            super.onServicesDiscovered(gatt, status);
+            Log.d("BLE1", "New Service!!");
+            List<BluetoothGattService> list = gatt.getServices();
+            for (BluetoothGattService s : list)
+            {
+                Log.d("BLE1", "In Service:" + s.getUuid());
+            }
+        }
+
+        @Override
+        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            super.onCharacteristicRead(gatt, characteristic, status);
+        }
+
+        @Override
+        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
+            super.onCharacteristicWrite(gatt, characteristic, status);
+        }
+
+        @Override
+        public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
+            super.onCharacteristicChanged(gatt, characteristic);
+        }
+
+        @Override
+        public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            super.onDescriptorRead(gatt, descriptor, status);
+        }
+
+        @Override
+        public void onDescriptorWrite(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
+            super.onDescriptorWrite(gatt, descriptor, status);
+        }
+
+        @Override
+        public void onReliableWriteCompleted(BluetoothGatt gatt, int status) {
+            super.onReliableWriteCompleted(gatt, status);
+        }
+
+        @Override
+        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status) {
+            super.onReadRemoteRssi(gatt, rssi, status);
+        }
+
+        @Override
+        public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
+            super.onMtuChanged(gatt, mtu, status);
+        }
+    };
+
     class MyScanCallBack extends ScanCallback
     {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
+            Log.d("BLE1", "Got: " + result.getDevice().getAddress()) ;
             if (targetAddr.equals(result.getDevice().getAddress()))
             {
                 BTDevice = result.getDevice();
+                BTGatt = BTDevice.connectGatt(getApplicationContext(), false, GattCallback); // 連接GATT
                 Log.d("BLE1", "Connect!!!") ;
             }
-            Log.d("BLE1", "Got: " + result.getDevice().getAddress()) ;
+
 
         }
 
