@@ -29,10 +29,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.List;
+import java.util.UUID;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class MainActivity extends AppCompatActivity {
+    public UUID UUID_IRT_SERV = UUID.fromString("00001809-0000-1000-8000-00805f9b34fb");
+    public UUID UUID_IRT_DATA = UUID.fromString("00002a1e-0000-1000-8000-00805f9b34fb");
+    public UUID CLIENT_CONFIG_DESCRIPTOR = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"); //定義手機的UUID
     final int REQUEST_CODE = 123;
     String targetAddr;
     BluetoothAdapter BTadapter;
@@ -132,6 +136,29 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public BluetoothGattCallback GattCallback = new BluetoothGattCallback() {
+        public void SetupSensorStep(BluetoothGatt gatt) {
+            BluetoothGattCharacteristic characteristic;
+            BluetoothGattDescriptor descriptor;
+
+            for (BluetoothGattCharacteristic c : gatt.getService(UUID_IRT_SERV).getCharacteristics())
+            {
+
+                for (BluetoothGattDescriptor desc : c.getDescriptors())
+                {
+
+                }
+            }
+
+            // Enable local notifications
+            characteristic = gatt.getService(UUID_IRT_SERV).getCharacteristic(UUID_IRT_DATA);
+            gatt.setCharacteristicNotification(characteristic, true);
+            // Enabled remote notifications
+            descriptor = characteristic.getDescriptor(CLIENT_CONFIG_DESCRIPTOR);
+            descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            gatt.writeDescriptor(descriptor);
+
+        }
+
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
@@ -169,6 +196,18 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
             super.onCharacteristicChanged(gatt, characteristic);
+            if (UUID_IRT_DATA.equals(characteristic.getUuid())) {
+
+                byte[] b = new byte[characteristic.getValue().length];
+                b = characteristic.getValue();
+                Byte b1 = b[2];
+                Byte b2 = b[1];
+
+                final int t = (b1 & 0xFF) * 255 + (b2 & 0xFF);
+
+                Log.d("BLE1", gatt.getDevice().getAddress() + ":DATA:" + bytesToHex(b) + ",Temp:" + t);
+
+            }
         }
 
         @Override
@@ -196,7 +235,16 @@ public class MainActivity extends AppCompatActivity {
             super.onMtuChanged(gatt, mtu, status);
         }
     };
-
+    final protected static char[] hexArray = "0123456789ABCDEF".toCharArray();
+    public static String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for ( int j = 0; j < bytes.length; j++ ) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
     class MyScanCallBack extends ScanCallback
     {
         @Override
