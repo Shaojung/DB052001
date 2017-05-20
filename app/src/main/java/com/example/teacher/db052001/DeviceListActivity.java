@@ -9,40 +9,59 @@ import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class DeviceListActivity extends AppCompatActivity {
-    BluetoothAdapter adapter;
+    BluetoothAdapter BTadapter;
     BluetoothLeScanner scanner;
+    ArrayList<String> showStr = new ArrayList<>();
+    ArrayList<String> addr = new ArrayList<>();
+    ArrayAdapter adapter;
+    ListView lv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device_list);
+        lv = (ListView) findViewById(R.id.listView);
         BluetoothManager manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        adapter = manager.getAdapter();
-        scanner = adapter.getBluetoothLeScanner();
+        BTadapter = manager.getAdapter();
+        scanner = BTadapter.getBluetoothLeScanner();
+        adapter = new ArrayAdapter(DeviceListActivity.this, android.R.layout.simple_list_item_1, showStr);
+        lv.setAdapter(adapter);
         BTScan();
     }
 
     public void BTScan()
     {
-        if (adapter == null)
+        if (BTadapter == null)
         {
             Toast.makeText(DeviceListActivity.this, "No Bluetooth", Toast.LENGTH_SHORT).show();
             return;
         }
-        if (!adapter.isEnabled())
+        if (!BTadapter.isEnabled())
         {
-            adapter.enable();
+            BTadapter.enable();
         }
+        addr.clear();
+        showStr.clear();
         scanner.startScan(new MyScanCallBack());
+
     }
     class MyScanCallBack extends ScanCallback
     {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
-            Log.d("BLE", result.getDevice().getAddress());
+            addr.add(result.getDevice().getAddress());
+            showStr.add(result.getDevice().getName() + "," + result.getDevice().getAddress());
+            adapter.notifyDataSetChanged();
+            Log.d("BLE", result.getDevice().getAddress() + "," + result.getDevice().getName()) ;
         }
+
+
     }
 }
