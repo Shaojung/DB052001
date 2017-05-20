@@ -6,9 +6,12 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -32,6 +35,15 @@ public class DeviceListActivity extends AppCompatActivity {
         scanner = BTadapter.getBluetoothLeScanner();
         adapter = new ArrayAdapter(DeviceListActivity.this, android.R.layout.simple_list_item_1, showStr);
         lv.setAdapter(adapter);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent it = new Intent();
+                it.putExtra("addr", addr.get(position));
+                setResult(RESULT_OK, it);
+                finish();
+            }
+        });
         BTScan();
     }
 
