@@ -130,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
                 BTDevice = result.getDevice();
                 Log.d("BLE1", "Connect!!!") ;
             }
+            Log.d("BLE1", "Got: " + result.getDevice().getAddress()) ;
 
         }
 
