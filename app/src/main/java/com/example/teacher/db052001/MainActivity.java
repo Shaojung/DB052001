@@ -3,9 +3,11 @@ package com.example.teacher.db052001;
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Handler;
@@ -36,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         hander = new Handler();
+        BluetoothManager manager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        BTadapter = manager.getAdapter();
+        scanner = BTadapter.getBluetoothLeScanner();
         btn = (Button) findViewById(R.id.button);
         tv1 = (TextView) findViewById(R.id.textView);
         int permission = ActivityCompat.checkSelfPermission(this,
